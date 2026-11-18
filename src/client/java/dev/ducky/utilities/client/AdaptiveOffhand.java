@@ -4,8 +4,8 @@ import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.tags.BlockTags;
 import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.inventory.ContainerInput;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.BlockHitResult;
@@ -14,8 +14,8 @@ import net.minecraft.world.phys.HitResult;
 
 public final class AdaptiveOffhand {
     private static boolean swapActive;
-    private static int swappedInventorySlot = -1;
-    private static int swappedHotbarSlot = -1;
+    private static int originalHotbarSlot = -1;
+    private static int autoSelectedSlot = -1;
     private static int targetEntityId = -1;
     private static net.minecraft.core.BlockPos targetBlock;
 
@@ -39,6 +39,10 @@ public final class AdaptiveOffhand {
         }
         if (swapActive) return;
 
+        // Only activate when the player is already holding a tool.
+        // This prevents switching away from food, blocks, and other held items.
+        if (!isSupportedTool(player.getMainHandItem())) return;
+
         if (hit instanceof EntityHitResult entityHit
                 && entityHit.getEntity() instanceof LivingEntity living
                 && living.isAlive()) {
@@ -47,9 +51,7 @@ public final class AdaptiveOffhand {
             int swordSlot = findSwordSlot(player);
             if (swordSlot < 0) return;
 
-            swappedHotbarSlot = player.getInventory().getSelectedSlot();
-            swapInventorySlotIntoMainHand(client, player, swordSlot, swappedHotbarSlot);
-            swappedInventorySlot = swordSlot;
+            selectHotbarSlot(player, swordSlot);
             targetEntityId = living.getId();
             swapActive = true;
             return;
@@ -57,15 +59,23 @@ public final class AdaptiveOffhand {
 
         if (hit instanceof BlockHitResult blockHit) {
             BlockState state = client.level.getBlockState(blockHit.getBlockPos());
-            ToolChoice choice = findBestBlockTool(player, state);
-            if (choice == null || !isBetterThanMainHand(player, state, choice.stack())) return;
+            int bestSlot = findBestBlockToolSlot(player, state);
+            if (bestSlot < 0 || bestSlot == player.getInventory().getSelectedSlot()) return;
 
-            swappedHotbarSlot = player.getInventory().getSelectedSlot();
-            swapInventorySlotIntoMainHand(client, player, choice.slot(), swappedHotbarSlot);
-            swappedInventorySlot = choice.slot();
+            ItemStack candidate = player.getInventory().getItem(bestSlot);
+            ItemStack current = player.getMainHandItem();
+            if (!isBetterForBlock(candidate, current, state)) return;
+
+            selectHotbarSlot(player, bestSlot);
             targetBlock = blockHit.getBlockPos();
             swapActive = true;
         }
+    }
+
+    private static void selectHotbarSlot(LocalPlayer player, int slot) {
+        originalHotbarSlot = player.getInventory().getSelectedSlot();
+        autoSelectedSlot = slot;
+        player.getInventory().setSelectedSlot(slot);
     }
 
     private static boolean isSameTarget(HitResult hit) {
@@ -77,73 +87,77 @@ public final class AdaptiveOffhand {
     }
 
     private static void restoreIfNeeded(Minecraft client, LocalPlayer player) {
-        if (!swapActive || player == null || client.gameMode == null) return;
+        if (!swapActive) return;
+        if (player == null || client.gameMode == null) {
+            clearState();
+            return;
+        }
         if (player.containerMenu != player.inventoryMenu) return;
 
-        if (swappedInventorySlot >= 0) {
-            swapInventorySlotIntoMainHand(client, player, swappedInventorySlot, swappedHotbarSlot);
+        // Do not override a hotbar choice the player made manually.
+        if (player.getInventory().getSelectedSlot() == autoSelectedSlot) {
+            player.getInventory().setSelectedSlot(originalHotbarSlot);
         }
         clearState();
     }
 
     private static void clearState() {
         swapActive = false;
-        swappedInventorySlot = -1;
-        swappedHotbarSlot = -1;
+        originalHotbarSlot = -1;
+        autoSelectedSlot = -1;
         targetEntityId = -1;
         targetBlock = null;
     }
 
-    private static void swapInventorySlotIntoMainHand(
-            Minecraft client, LocalPlayer player, int inventorySlot, int hotbarSlot) {
-        int menuSlot = inventorySlot < 9 ? inventorySlot + 36 : inventorySlot;
-        client.gameMode.handleContainerInput(
-                player.inventoryMenu.containerId, menuSlot, hotbarSlot,
-                ContainerInput.SWAP, player);
-    }
+    private static int findBestBlockToolSlot(LocalPlayer player, BlockState state) {
+        String requiredTool = getRequiredTool(state);
+        if (requiredTool == null) return -1;
 
-    private static ToolChoice findBestBlockTool(LocalPlayer player, BlockState state) {
-        ItemStack best = ItemStack.EMPTY;
         int bestSlot = -1;
         float bestSpeed = -1.0F;
-        boolean bestCorrect = false;
-
-        for (int slot = 0; slot < 36; slot++) {
+        for (int slot = 0; slot < 9; slot++) {
             if (slot == player.getInventory().getSelectedSlot()) continue;
             ItemStack candidate = player.getInventory().getItem(slot);
-            if (candidate.isEmpty() || !isBlockTool(candidate)) continue;
+            if (!isToolFor(candidate, requiredTool)) continue;
 
-            boolean correct = candidate.isCorrectToolForDrops(state);
             float speed = candidate.getDestroySpeed(state);
-            boolean preferred = state.requiresCorrectToolForDrops() && correct && !bestCorrect;
-            if (preferred || (correct == bestCorrect && speed > bestSpeed)) {
-                best = candidate;
-                bestSlot = slot;
+            if (speed > bestSpeed) {
                 bestSpeed = speed;
-                bestCorrect = correct;
+                bestSlot = slot;
             }
         }
-
-        return best.isEmpty() ? null : new ToolChoice(best, bestSlot);
+        return bestSlot;
     }
 
-    private static boolean isBetterThanMainHand(
-            LocalPlayer player, BlockState state, ItemStack candidate) {
-        ItemStack main = player.getMainHandItem();
-        boolean candidateCorrect = candidate.isCorrectToolForDrops(state);
-        boolean mainCorrect = main.isCorrectToolForDrops(state);
-        if (state.requiresCorrectToolForDrops() && candidateCorrect != mainCorrect) {
-            return candidateCorrect;
-        }
-        return candidate.getDestroySpeed(state) > main.getDestroySpeed(state);
+    private static String getRequiredTool(BlockState state) {
+        if (state.is(BlockTags.MINEABLE_WITH_AXE)) return "axe";
+        if (state.is(BlockTags.MINEABLE_WITH_SHOVEL)) return "shovel";
+        if (state.is(BlockTags.MINEABLE_WITH_PICKAXE)) return "pickaxe";
+        if (state.is(BlockTags.MINEABLE_WITH_HOE)) return "hoe";
+        return null;
+    }
+
+    private static boolean isToolFor(ItemStack stack, String tool) {
+        if (stack.isEmpty()) return false;
+        String path = BuiltInRegistries.ITEM.getKey(stack.getItem()).getPath();
+        return path.endsWith("_" + tool);
+    }
+
+    private static boolean isBetterForBlock(
+            ItemStack candidate, ItemStack current, BlockState state) {
+        return candidate.getDestroySpeed(state) > current.getDestroySpeed(state);
     }
 
     private static int findSwordSlot(LocalPlayer player) {
-        for (int slot = 0; slot < 36; slot++) {
+        for (int slot = 0; slot < 9; slot++) {
             if (slot == player.getInventory().getSelectedSlot()) continue;
             if (isSword(player.getInventory().getItem(slot))) return slot;
         }
         return -1;
+    }
+
+    private static boolean isSupportedTool(ItemStack stack) {
+        return isBlockTool(stack) || isSword(stack);
     }
 
     private static boolean isBlockTool(ItemStack stack) {
@@ -157,6 +171,4 @@ public final class AdaptiveOffhand {
         return !stack.isEmpty()
                 && BuiltInRegistries.ITEM.getKey(stack.getItem()).getPath().endsWith("_sword");
     }
-
-    private record ToolChoice(ItemStack stack, int slot) {}
 }
