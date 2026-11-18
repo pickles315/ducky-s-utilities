@@ -75,7 +75,8 @@ public final class AdaptiveOffhand {
             if (choice == null || !isBetterThanMainHand(player, state, choice.stack())) return;
 
             if (choice.offhand()) {
-                swapMainHandWithOffhand(client, player);
+                swappedHotbarSlot = player.getInventory().getSelectedSlot();
+                swapMainHandWithOffhand(client, player, swappedHotbarSlot);
                 swappedWithOffhand = true;
             } else {
                 swappedHotbarSlot = player.getInventory().getSelectedSlot();
