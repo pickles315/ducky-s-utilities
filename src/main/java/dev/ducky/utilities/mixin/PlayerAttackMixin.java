@@ -10,10 +10,10 @@ import org.spongepowered.asm.mixin.injection.At;
 @Mixin(Player.class)
 public abstract class PlayerAttackMixin {
     @ModifyExpressionValue(
-        method = "attack",
+        method = "attack(Lnet/minecraft/world/entity/Entity;)V",
         at = @At(
             value = "INVOKE",
-            target = "Lnet/minecraft/world/entity/LivingEntity;getWeaponItem()Lnet/minecraft/world/item/ItemStack;"
+            target = "Lnet/minecraft/world/entity/player/Player;getWeaponItem()Lnet/minecraft/world/item/ItemStack;"
         )
     )
     private ItemStack duckyUtilities$useOffhandSwordForAttack(ItemStack original) {
