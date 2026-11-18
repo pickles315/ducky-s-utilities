@@ -1,0 +1,29 @@
+{
+  "schemaVersion": 1,
+  "id": "ducky_utilities",
+  "version": "${version}",
+  "name": "Ducky's MC Utilities",
+  "description": "A collection of useful Minecraft client utilities, offhand improvements, and configurable rendering optimisations.",
+  "authors": ["pickles315"],
+  "license": "MIT",
+  "environment": "*",
+  "icon": "assets/ducky_utilities/icon.png",
+  "entrypoints": {
+    "main": ["dev.ducky.utilities.DuckyUtilities"],
+    "client": ["dev.ducky.utilities.client.DuckyUtilitiesClient"]
+  },
+  "mixins": [
+    "ducky_utilities.mixins.json",
+    {
+      "config": "ducky_utilities.client.mixins.json",
+      "environment": "client"
+    }
+  ],
+  "depends": {
+    "fabricloader": ">=0.20.1",
+    "minecraft": "26.2",
+    "java": ">=25",
+    "fabric-api": "*",
+    "yet_another_config_lib_v3": ">=3.9.7"
+  }
+}
