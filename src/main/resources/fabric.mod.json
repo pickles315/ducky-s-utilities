@@ -3,17 +3,15 @@
   "id": "ducky_utilities",
   "version": "${version}",
   "name": "Ducky's MC Utilities",
-  "description": "A collection of useful Minecraft client utilities, offhand improvements, and configurable rendering optimisations.",
+  "description": "Client-side Minecraft utilities, adaptive offhand helpers, and configurable rendering optimisations.",
   "authors": ["pickles315"],
   "license": "MIT",
-  "environment": "*",
+  "environment": "client",
   "icon": "assets/ducky_utilities/icon.png",
   "entrypoints": {
-    "main": ["dev.ducky.utilities.DuckyUtilities"],
     "client": ["dev.ducky.utilities.client.DuckyUtilitiesClient"]
   },
   "mixins": [
-    "ducky_utilities.mixins.json",
     {
       "config": "ducky_utilities.client.mixins.json",
       "environment": "client"
