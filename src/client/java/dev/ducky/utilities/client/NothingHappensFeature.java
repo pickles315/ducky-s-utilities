@@ -2,6 +2,9 @@ package dev.ducky.utilities.client;
 
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.components.toasts.SystemToast;
+import net.minecraft.network.chat.Component;
+
 import java.util.concurrent.ThreadLocalRandom;
 
 public final class NothingHappensFeature {
@@ -27,7 +30,12 @@ public final class NothingHappensFeature {
             activeTicks = 0;
 
             if (ThreadLocalRandom.current().nextLong(ONE_QUINTILLION) == 0L) {
-                // The rare event is intentionally that absolutely nothing happens.
+                SystemToast.add(
+                    client,
+                    SystemToast.SystemToastId.PERIODIC_NOTIFICATION,
+                    Component.literal("One in a Quintillion"),
+                    Component.literal("Very lucky. Nothing happened.")
+                );
             }
         }
     }
