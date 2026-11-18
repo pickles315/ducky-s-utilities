@@ -17,6 +17,8 @@ public final class PerformanceConfig {
     public static volatile double maxEntityDistance = 96.0;
     public static volatile boolean blockEntityCulling = true;
     public static volatile double maxBlockEntityDistance = 64.0;
+    public static volatile boolean itemEntityCulling = true;
+    public static volatile double maxItemEntityDistance = 48.0;
 
     private PerformanceConfig() {}
 
@@ -30,6 +32,8 @@ public final class PerformanceConfig {
         maxEntityDistance = readDistance(p, "maxEntityDistance", 96.0, 512.0);
         blockEntityCulling = Boolean.parseBoolean(p.getProperty("blockEntityCulling", "true"));
         maxBlockEntityDistance = readDistance(p, "maxBlockEntityDistance", 64.0, 256.0);
+        itemEntityCulling = Boolean.parseBoolean(p.getProperty("itemEntityCulling", "true"));
+        maxItemEntityDistance = readDistance(p, "maxItemEntityDistance", 48.0, 256.0);
         save();
     }
 
@@ -44,6 +48,8 @@ public final class PerformanceConfig {
         p.setProperty("maxEntityDistance", Double.toString(maxEntityDistance));
         p.setProperty("blockEntityCulling", Boolean.toString(blockEntityCulling));
         p.setProperty("maxBlockEntityDistance", Double.toString(maxBlockEntityDistance));
+        p.setProperty("itemEntityCulling", Boolean.toString(itemEntityCulling));
+        p.setProperty("maxItemEntityDistance", Double.toString(maxItemEntityDistance));
         try {
             Files.createDirectories(CONFIG_PATH.getParent());
             try (Writer writer = Files.newBufferedWriter(CONFIG_PATH)) { p.store(writer, "Ducky's MC Utilities settings"); }
