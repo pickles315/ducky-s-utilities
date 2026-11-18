@@ -7,7 +7,10 @@ import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.inventory.ChestMenu;
-import net.minecraft.world.inventory.ClickType;
+import net.minecraft.world.inventory.ContainerInput;
+import net.minecraft.client.gui.components.events.GuiEventListener;
+import net.minecraft.client.gui.components.Renderable;
+import net.minecraft.client.gui.narration.NarratableEntry;
 import net.minecraft.world.item.ItemStack;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -23,6 +26,7 @@ public abstract class ChestSortButtonMixin {
     @Shadow protected int topPos;
     @Shadow protected int imageWidth;
     @Shadow protected AbstractContainerMenu menu;
+    @Shadow protected abstract <T extends GuiEventListener & Renderable & NarratableEntry> T addRenderableWidget(T widget);
 
     @Inject(method = "init", at = @At("TAIL"))
     private void duckyUtilities$addSortButton(CallbackInfo ci) {
@@ -35,7 +39,7 @@ public abstract class ChestSortButtonMixin {
             buttonX = leftPos + imageWidth - 68;
             buttonY = topPos - 22;
         }
-        screen.addRenderableWidget(Button.builder(
+        addRenderableWidget(Button.builder(
                 net.minecraft.network.chat.Component.literal("Sort"),
                 button -> duckyUtilities$sortContainer())
                 .bounds(buttonX, buttonY, 64, 20).build());
@@ -44,7 +48,7 @@ public abstract class ChestSortButtonMixin {
     // Only sort containers whose slots are interchangeable. Furnace-like menus
     // are intentionally excluded because their input, fuel, and output slots differ.
     private int duckyUtilities$containerSlotCount() {
-        if (menu instanceof ChestMenu chestMenu) return chestMenu.getContainerSize();
+        if (menu instanceof ChestMenu) return menu.slots.size() - 36;
 
         String menuName = menu.getClass().getSimpleName();
         return switch (menuName) {
@@ -74,9 +78,9 @@ public abstract class ChestSortButtonMixin {
                 if (targetStack.isEmpty() || !ItemStack.isSameItemSameComponents(sourceStack, targetStack)) continue;
                 if (targetStack.getCount() >= targetStack.getMaxStackSize()) continue;
 
-                client.gameMode.handleInventoryMouseClick(syncId, source, 0, ClickType.PICKUP, player);
-                client.gameMode.handleInventoryMouseClick(syncId, target, 0, ClickType.PICKUP, player);
-                client.gameMode.handleInventoryMouseClick(syncId, source, 0, ClickType.PICKUP, player);
+                client.gameMode.handleContainerInput(syncId, source, 0, ClickType.PICKUP, player);
+                client.gameMode.handleContainerInput(syncId, target, 0, ClickType.PICKUP, player);
+                client.gameMode.handleContainerInput(syncId, source, 0, ClickType.PICKUP, player);
                 sourceStack = menu.getSlot(source).getItem();
                 if (sourceStack.isEmpty()) break;
             }
@@ -96,9 +100,9 @@ public abstract class ChestSortButtonMixin {
                 }
             }
             if (smallest != i) {
-                client.gameMode.handleInventoryMouseClick(syncId, i, 0, ClickType.PICKUP, player);
-                client.gameMode.handleInventoryMouseClick(syncId, smallest, 0, ClickType.PICKUP, player);
-                client.gameMode.handleInventoryMouseClick(syncId, i, 0, ClickType.PICKUP, player);
+                client.gameMode.handleContainerInput(syncId, i, 0, ClickType.PICKUP, player);
+                client.gameMode.handleContainerInput(syncId, smallest, 0, ClickType.PICKUP, player);
+                client.gameMode.handleContainerInput(syncId, i, 0, ClickType.PICKUP, player);
             }
         }
     }
