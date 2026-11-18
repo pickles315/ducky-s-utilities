@@ -14,6 +14,7 @@ public final class DuckyUtilitiesClient implements ClientModInitializer {
         PerformanceConfig.load();
         VideoSettingsButton.register();
         NothingHappensFeature.register();
+        AdaptiveOffhand.register();
         LOGGER.info("Ducky's MC Utilities client features loaded.");
     }
 }
