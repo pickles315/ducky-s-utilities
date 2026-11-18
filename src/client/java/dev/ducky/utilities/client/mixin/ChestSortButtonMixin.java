@@ -29,12 +29,11 @@ public abstract class ChestSortButtonMixin {
         if (duckyUtilities$containerSlotCount() <= 0) return;
 
         AbstractContainerScreen<?> screen = (AbstractContainerScreen<?>) (Object) this;
-        int buttonX = leftPos + imageWidth + 4;
-        int buttonY = topPos + 6;
-        if (buttonX + 64 > screen.width) {
-            buttonX = leftPos + imageWidth - 68;
-            buttonY = topPos - 22;
-        }
+        // Keep the button above the container instead of beside it, where
+        // JEI's item list and controls commonly occupy the screen.
+        int buttonX = leftPos + (imageWidth - 64) / 2;
+        int buttonY = Math.max(4, topPos - 24);
+        buttonX = Math.max(4, Math.min(buttonX, screen.width - 68));
         Button sortButton = Button.builder(
                 net.minecraft.network.chat.Component.literal("Sort"),
                 button -> duckyUtilities$sortContainer())
