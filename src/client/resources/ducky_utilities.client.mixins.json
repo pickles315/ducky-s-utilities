@@ -7,7 +7,8 @@
     "BlockEntityRenderDispatcherMixin",
     "ScreenAccessor",
     "ChestSortButtonMixin",
-    "MinecraftToolSwingMixin"
+    "MinecraftToolSwingMixin",
+    "BlockUpdateOptimizationMixin"
   ],
   "injectors": {
     "defaultRequire": 1
