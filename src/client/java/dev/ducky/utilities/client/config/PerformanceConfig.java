@@ -19,6 +19,10 @@ public final class PerformanceConfig {
     public static volatile double maxBlockEntityDistance = 64.0;
     public static volatile boolean itemEntityCulling = true;
     public static volatile double maxItemEntityDistance = 48.0;
+    public static volatile boolean chunkUpdateOptimization = true;
+    public static volatile boolean chunkLoadingOptimization = true;
+    public static volatile boolean blockUpdateOptimization = true;
+    public static volatile boolean lightingOptimization = true;
 
     private PerformanceConfig() {}
 
@@ -34,6 +38,10 @@ public final class PerformanceConfig {
         maxBlockEntityDistance = readDistance(p, "maxBlockEntityDistance", 64.0, 256.0);
         itemEntityCulling = Boolean.parseBoolean(p.getProperty("itemEntityCulling", "true"));
         maxItemEntityDistance = readDistance(p, "maxItemEntityDistance", 48.0, 256.0);
+        chunkUpdateOptimization = Boolean.parseBoolean(p.getProperty("chunkUpdateOptimization", "true"));
+        chunkLoadingOptimization = Boolean.parseBoolean(p.getProperty("chunkLoadingOptimization", "true"));
+        blockUpdateOptimization = Boolean.parseBoolean(p.getProperty("blockUpdateOptimization", "true"));
+        lightingOptimization = Boolean.parseBoolean(p.getProperty("lightingOptimization", "true"));
         save();
     }
 
@@ -50,6 +58,10 @@ public final class PerformanceConfig {
         p.setProperty("maxBlockEntityDistance", Double.toString(maxBlockEntityDistance));
         p.setProperty("itemEntityCulling", Boolean.toString(itemEntityCulling));
         p.setProperty("maxItemEntityDistance", Double.toString(maxItemEntityDistance));
+        p.setProperty("chunkUpdateOptimization", Boolean.toString(chunkUpdateOptimization));
+        p.setProperty("chunkLoadingOptimization", Boolean.toString(chunkLoadingOptimization));
+        p.setProperty("blockUpdateOptimization", Boolean.toString(blockUpdateOptimization));
+        p.setProperty("lightingOptimization", Boolean.toString(lightingOptimization));
         try {
             Files.createDirectories(CONFIG_PATH.getParent());
             try (Writer writer = Files.newBufferedWriter(CONFIG_PATH)) { p.store(writer, "Ducky's MC Utilities settings"); }
