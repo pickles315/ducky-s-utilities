@@ -1,5 +1,6 @@
 {
   "required": true,
+  "plugin": "dev.ducky.utilities.client.mixin.SodiumCompatMixinPlugin",
   "package": "dev.ducky.utilities.client.mixin",
   "compatibilityLevel": "JAVA_25",
   "client": [
