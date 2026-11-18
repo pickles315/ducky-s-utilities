@@ -3,7 +3,12 @@
   "package": "dev.ducky.utilities.mixin",
   "compatibilityLevel": "JAVA_25",
   "mixins": [
-    "PlayerAttackMixin"
+    "PlayerAttackMixin",
+    "PlayerMiningMixin",
+    "ServerPlayerGameModeMixin"
+  ],
+  "client": [
+    "MultiPlayerGameModeMixin"
   ],
   "injectors": {
     "defaultRequire": 1
