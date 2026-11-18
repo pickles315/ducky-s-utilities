@@ -4,15 +4,22 @@ import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.inventory.ClickType;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.BlockHitResult;
+import net.minecraft.world.phys.EntityHitResult;
 import net.minecraft.world.phys.HitResult;
 
 public final class AdaptiveOffhand {
-    private static final int OFFHAND_MENU_SLOT = 40;
+    // InventoryMenu uses button 40 with ClickType.SWAP to exchange a slot with the offhand.
+    private static final int OFFHAND_SWAP_BUTTON = 40;
+    private static final int SWAP_COOLDOWN_TICKS = 5;
+
     private static int lastSwapTick = -100;
+    private static ItemStack mobReturnStack = ItemStack.EMPTY;
+    private static boolean mobSwordActive = false;
 
     private AdaptiveOffhand() {}
 
@@ -24,15 +31,49 @@ public final class AdaptiveOffhand {
         LocalPlayer player = client.player;
         if (player == null || client.level == null || client.screen != null
                 || client.interactionManager == null
-                || player.containerMenu != player.inventoryMenu
-                || player.getOffhandItem().isEmpty()
-                || !isBlockTool(player.getOffhandItem())) {
+                || player.containerMenu != player.inventoryMenu) {
             return;
         }
 
-        if (player.tickCount - lastSwapTick < 5) return;
+        if (player.tickCount - lastSwapTick < SWAP_COOLDOWN_TICKS) return;
 
         HitResult hit = client.hitResult;
+
+        // While looking at a living entity, temporarily equip a sword in the offhand.
+        if (hit instanceof EntityHitResult entityHit
+                && hit.getType() == HitResult.Type.ENTITY
+                && entityHit.getEntity() instanceof LivingEntity) {
+            if (mobSwordActive) return;
+
+            ItemStack currentOffhand = player.getOffhandItem();
+            if (currentOffhand.isEmpty() || !isSupportedTool(currentOffhand) || isSword(currentOffhand)) {
+                return;
+            }
+
+            int swordSlot = findSwordSlot(player);
+            if (swordSlot < 0) return;
+
+            mobReturnStack = currentOffhand.copy();
+            swapInventorySlotWithOffhand(client, player, swordSlot);
+            mobSwordActive = true;
+            lastSwapTick = player.tickCount;
+            return;
+        }
+
+        // As soon as the crosshair leaves the mob, put the previous offhand item back.
+        if (mobSwordActive) {
+            int returnSlot = findMatchingStackSlot(player, mobReturnStack);
+            if (returnSlot >= 0) {
+                swapInventorySlotWithOffhand(client, player, returnSlot);
+                lastSwapTick = player.tickCount;
+            }
+            mobSwordActive = false;
+            mobReturnStack = ItemStack.EMPTY;
+        }
+
+        // Normal adaptive block-tool selection.
+        ItemStack offhand = player.getOffhandItem();
+        if (offhand.isEmpty() || !isSupportedTool(offhand)) return;
         if (!(hit instanceof BlockHitResult blockHit) || hit.getType() != HitResult.Type.BLOCK) return;
 
         BlockState state = client.level.getBlockState(blockHit.getBlockPos());
@@ -42,13 +83,23 @@ public final class AdaptiveOffhand {
             return;
         }
 
-        int sourceSlot = findStackSlot(player, replacement);
+        int sourceSlot = findMatchingStackSlot(player, replacement);
         if (sourceSlot < 0) return;
 
-        client.interactionManager.clickSlot(player.inventoryMenu.containerId, sourceSlot, 0, ClickType.PICKUP, player);
-        client.interactionManager.clickSlot(player.inventoryMenu.containerId, OFFHAND_MENU_SLOT, 0, ClickType.PICKUP, player);
-        client.interactionManager.clickSlot(player.inventoryMenu.containerId, sourceSlot, 0, ClickType.PICKUP, player);
+        swapInventorySlotWithOffhand(client, player, sourceSlot);
         lastSwapTick = player.tickCount;
+    }
+
+    private static void swapInventorySlotWithOffhand(
+            Minecraft client, LocalPlayer player, int inventorySlot) {
+        int menuSlot = inventorySlot < 9 ? inventorySlot + 36 : inventorySlot;
+        client.interactionManager.clickSlot(
+                player.inventoryMenu.containerId,
+                menuSlot,
+                OFFHAND_SWAP_BUTTON,
+                ClickType.SWAP,
+                player
+        );
     }
 
     private static ItemStack findBestBlockTool(LocalPlayer player, BlockState state) {
@@ -77,17 +128,37 @@ public final class AdaptiveOffhand {
         return best;
     }
 
-    private static int findStackSlot(LocalPlayer player, ItemStack target) {
+    private static int findSwordSlot(LocalPlayer player) {
         for (int slot = 0; slot < 36; slot++) {
             if (slot == player.getInventory().getSelectedSlot()) continue;
-            if (player.getInventory().getItem(slot) == target) return slot;
+            if (isSword(player.getInventory().getItem(slot))) return slot;
         }
         return -1;
+    }
+
+    private static int findMatchingStackSlot(LocalPlayer player, ItemStack target) {
+        if (target.isEmpty()) return -1;
+        for (int slot = 0; slot < 36; slot++) {
+            if (slot == player.getInventory().getSelectedSlot()) continue;
+            if (ItemStack.isSameItemSameComponents(player.getInventory().getItem(slot), target)) {
+                return slot;
+            }
+        }
+        return -1;
+    }
+
+    private static boolean isSupportedTool(ItemStack stack) {
+        return isBlockTool(stack) || isSword(stack);
     }
 
     private static boolean isBlockTool(ItemStack stack) {
         String path = BuiltInRegistries.ITEM.getKey(stack.getItem()).getPath();
         return path.endsWith("_pickaxe") || path.endsWith("_axe")
                 || path.endsWith("_shovel") || path.endsWith("_hoe");
+    }
+
+    private static boolean isSword(ItemStack stack) {
+        return !stack.isEmpty()
+                && BuiltInRegistries.ITEM.getKey(stack.getItem()).getPath().endsWith("_sword");
     }
 }
