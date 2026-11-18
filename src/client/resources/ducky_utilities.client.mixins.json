@@ -5,6 +5,7 @@
   "client": [
     "EntityRenderDispatcherMixin",
     "BlockEntityRenderDispatcherMixin",
+    "ScreenAccessor",
     "ChestSortButtonMixin"
   ],
   "injectors": {
