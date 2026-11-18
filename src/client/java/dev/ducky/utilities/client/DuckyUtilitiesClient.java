@@ -13,6 +13,7 @@ public final class DuckyUtilitiesClient implements ClientModInitializer {
     public void onInitializeClient() {
         PerformanceConfig.load();
         VideoSettingsButton.register();
+        NothingHappensFeature.register();
         LOGGER.info("Ducky's MC Utilities client features loaded.");
     }
 }
