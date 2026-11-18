@@ -8,9 +8,6 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.inventory.ChestMenu;
 import net.minecraft.world.inventory.ContainerInput;
-import net.minecraft.client.gui.components.events.GuiEventListener;
-import net.minecraft.client.gui.components.Renderable;
-import net.minecraft.client.gui.narration.NarratableEntry;
 import net.minecraft.world.item.ItemStack;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -26,7 +23,6 @@ public abstract class ChestSortButtonMixin {
     @Shadow protected int topPos;
     @Shadow protected int imageWidth;
     @Shadow protected AbstractContainerMenu menu;
-    @Shadow protected abstract <T extends GuiEventListener & Renderable & NarratableEntry> T addRenderableWidget(T widget);
 
     @Inject(method = "init", at = @At("TAIL"))
     private void duckyUtilities$addSortButton(CallbackInfo ci) {
@@ -39,10 +35,11 @@ public abstract class ChestSortButtonMixin {
             buttonX = leftPos + imageWidth - 68;
             buttonY = topPos - 22;
         }
-        addRenderableWidget(Button.builder(
+        Button sortButton = Button.builder(
                 net.minecraft.network.chat.Component.literal("Sort"),
                 button -> duckyUtilities$sortContainer())
-                .bounds(buttonX, buttonY, 64, 20).build());
+                .bounds(buttonX, buttonY, 64, 20).build();
+        ((ScreenAccessor) (Object) screen).duckyUtilities$addRenderableWidget(sortButton);
     }
 
     // Only sort containers whose slots are interchangeable. Furnace-like menus
