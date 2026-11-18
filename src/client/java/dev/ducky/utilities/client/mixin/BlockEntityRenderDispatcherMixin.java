@@ -14,14 +14,14 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 @Mixin(BlockEntityRenderDispatcher.class)
 public abstract class BlockEntityRenderDispatcherMixin {
-    @Shadow public abstract <E extends BlockEntity> BlockEntityRenderer<E> getRenderer(E blockEntity);
+    @Shadow public abstract <E extends BlockEntity> BlockEntityRenderer<E, ?> getRenderer(E blockEntity);
 
     @Inject(method = "tryExtractRenderState", at = @At("HEAD"), cancellable = true)
     private void duckyUtilities$limitDistantBlockEntities(BlockEntity blockEntity, float partialTick,
             net.minecraft.client.renderer.feature.ModelFeatureRenderer.CrumblingOverlay crumblingOverlay,
             boolean globallyRendered, CallbackInfoReturnable<BlockEntityRenderState> cir) {
         if (!PerformanceConfig.blockEntityCulling || globallyRendered || blockEntity == null) return;
-        BlockEntityRenderer<?> renderer = getRenderer(blockEntity);
+        BlockEntityRenderer<?, ?> renderer = getRenderer(blockEntity);
         if (renderer == null || renderer.shouldRenderOffScreen()) return;
         var camera = Minecraft.getInstance().gameRenderer.mainCamera().position();
         double dx = blockEntity.getBlockPos().getX() + 0.5 - camera.x();
