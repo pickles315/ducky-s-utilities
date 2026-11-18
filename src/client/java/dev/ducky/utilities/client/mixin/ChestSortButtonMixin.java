@@ -3,12 +3,11 @@ package dev.ducky.utilities.client.mixin;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
-import net.minecraft.client.gui.screens.inventory.ChestScreen;
 import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.inventory.ChestMenu;
 import net.minecraft.world.inventory.ClickType;
-import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -27,7 +26,8 @@ public abstract class ChestSortButtonMixin {
 
     @Inject(method = "init", at = @At("TAIL"))
     private void duckyUtilities$addSortButton(CallbackInfo ci) {
-        if (!((Object) this instanceof ChestScreen) || !(menu instanceof ChestMenu)) return;
+        if (duckyUtilities$containerSlotCount() <= 0) return;
+
         AbstractContainerScreen<?> screen = (AbstractContainerScreen<?>) (Object) this;
         int buttonX = leftPos + imageWidth + 4;
         int buttonY = topPos + 6;
@@ -37,20 +37,34 @@ public abstract class ChestSortButtonMixin {
         }
         screen.addRenderableWidget(Button.builder(
                 net.minecraft.network.chat.Component.literal("Sort"),
-                button -> duckyUtilities$sortChest())
+                button -> duckyUtilities$sortContainer())
                 .bounds(buttonX, buttonY, 64, 20).build());
     }
 
-    private void duckyUtilities$sortChest() {
+    // Only sort containers whose slots are interchangeable. Furnace-like menus
+    // are intentionally excluded because their input, fuel, and output slots differ.
+    private int duckyUtilities$containerSlotCount() {
+        if (menu instanceof ChestMenu chestMenu) return chestMenu.getContainerSize();
+
+        String menuName = menu.getClass().getSimpleName();
+        return switch (menuName) {
+            case "ShulkerBoxMenu" -> 27;
+            case "HopperMenu" -> 5;
+            case "DispenserMenu" -> 9;
+            default -> 0;
+        };
+    }
+
+    private void duckyUtilities$sortContainer() {
         Minecraft client = Minecraft.getInstance();
         Player player = client.player;
-        if (player == null || client.gameMode == null || !(menu instanceof ChestMenu)) return;
+        int containerSlots = duckyUtilities$containerSlotCount();
+        if (player == null || client.gameMode == null || containerSlots <= 0) return;
         if (!menu.getCarried().isEmpty()) return;
 
-        int containerSlots = ((ChestMenu) menu).getContainerSize();
         int syncId = menu.containerId;
 
-        // First merge compatible partial stacks, using normal inventory click packets.
+        // Merge compatible partial stacks first, using ordinary menu click packets.
         for (int source = 0; source < containerSlots; source++) {
             ItemStack sourceStack = menu.getSlot(source).getItem();
             if (sourceStack.isEmpty()) continue;
@@ -59,6 +73,7 @@ public abstract class ChestSortButtonMixin {
                 ItemStack targetStack = menu.getSlot(target).getItem();
                 if (targetStack.isEmpty() || !ItemStack.isSameItemSameComponents(sourceStack, targetStack)) continue;
                 if (targetStack.getCount() >= targetStack.getMaxStackSize()) continue;
+
                 client.gameMode.handleInventoryMouseClick(syncId, source, 0, ClickType.PICKUP, player);
                 client.gameMode.handleInventoryMouseClick(syncId, target, 0, ClickType.PICKUP, player);
                 client.gameMode.handleInventoryMouseClick(syncId, source, 0, ClickType.PICKUP, player);
@@ -67,7 +82,6 @@ public abstract class ChestSortButtonMixin {
             }
         }
 
-        // Then sort by item ID and component data, leaving empty slots at the end.
         Comparator<ItemStack> order = Comparator
                 .comparing((ItemStack stack) -> stack.isEmpty() ? 1 : 0)
                 .thenComparing(stack -> stack.isEmpty() ? "" :
