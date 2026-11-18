@@ -5,7 +5,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.inventory.ClickType;
+import net.minecraft.world.inventory.ContainerInput;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.BlockHitResult;
@@ -29,8 +29,8 @@ public final class AdaptiveOffhand {
 
     private static void onClientTick(Minecraft client) {
         LocalPlayer player = client.player;
-        if (player == null || client.level == null || client.screen != null
-                || client.interactionManager == null
+        if (player == null || client.level == null || client.gui.screen() != null
+                || client.gameMode == null
                 || player.containerMenu != player.inventoryMenu) {
             return;
         }
@@ -93,11 +93,11 @@ public final class AdaptiveOffhand {
     private static void swapInventorySlotWithOffhand(
             Minecraft client, LocalPlayer player, int inventorySlot) {
         int menuSlot = inventorySlot < 9 ? inventorySlot + 36 : inventorySlot;
-        client.interactionManager.clickSlot(
+        client.gameMode.handleContainerInput(
                 player.inventoryMenu.containerId,
                 menuSlot,
                 OFFHAND_SWAP_BUTTON,
-                ClickType.SWAP,
+                ContainerInput.SWAP,
                 player
         );
     }
