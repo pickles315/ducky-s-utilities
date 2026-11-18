@@ -13,7 +13,6 @@ public final class DuckyUtilitiesClient implements ClientModInitializer {
     public void onInitializeClient() {
         PerformanceConfig.load();
         VideoSettingsButton.register();
-        NothingHappensFeature.register();
         AdaptiveOffhand.register();
         net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents.END_CLIENT_TICK.register(WorldPerformanceOptimizations::apply);
         LOGGER.info("Ducky's MC Utilities client features loaded.");
