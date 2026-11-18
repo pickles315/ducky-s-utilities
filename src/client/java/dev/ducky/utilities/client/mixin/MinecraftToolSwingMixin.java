@@ -39,15 +39,23 @@ public abstract class MinecraftToolSwingMixin {
     private InteractionHand duckyUtilities$getMiningHand(InteractionHand original) {
         Minecraft minecraft = (Minecraft) (Object) this;
         LocalPlayer player = minecraft.player;
-        if (player == null || minecraft.hitResult == null
-                || minecraft.hitResult.getType() != HitResult.Type.BLOCK
-                || !(minecraft.hitResult instanceof BlockHitResult blockHit)
-                || player.level() == null) {
+        if (player == null || minecraft.hitResult == null) {
             return original;
         }
 
-        if (OffhandToolHelper.shouldUseOffhand(
-                player, player.level().getBlockState(blockHit.getBlockPos()))) {
+        // Use the offhand sword for the swing when the attack is being
+        // performed with the offhand sword selected by PlayerAttackMixin.
+        if (minecraft.hitResult.getType() == HitResult.Type.ENTITY
+                && OffhandToolHelper.shouldUseOffhandForAttack(player)) {
+            return InteractionHand.OFF_HAND;
+        }
+
+        // For block breaking, animate whichever hand has the better tool.
+        if (minecraft.hitResult.getType() == HitResult.Type.BLOCK
+                && minecraft.hitResult instanceof BlockHitResult blockHit
+                && player.level() != null
+                && OffhandToolHelper.shouldUseOffhand(
+                    player, player.level().getBlockState(blockHit.getBlockPos()))) {
             return InteractionHand.OFF_HAND;
         }
 
