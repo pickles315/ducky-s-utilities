@@ -78,9 +78,9 @@ public abstract class ChestSortButtonMixin {
                 if (targetStack.isEmpty() || !ItemStack.isSameItemSameComponents(sourceStack, targetStack)) continue;
                 if (targetStack.getCount() >= targetStack.getMaxStackSize()) continue;
 
-                client.gameMode.handleContainerInput(syncId, source, 0, ClickType.PICKUP, player);
-                client.gameMode.handleContainerInput(syncId, target, 0, ClickType.PICKUP, player);
-                client.gameMode.handleContainerInput(syncId, source, 0, ClickType.PICKUP, player);
+                client.gameMode.handleContainerInput(syncId, source, 0, ContainerInput.PICKUP, player);
+                client.gameMode.handleContainerInput(syncId, target, 0, ContainerInput.PICKUP, player);
+                client.gameMode.handleContainerInput(syncId, source, 0, ContainerInput.PICKUP, player);
                 sourceStack = menu.getSlot(source).getItem();
                 if (sourceStack.isEmpty()) break;
             }
@@ -100,9 +100,9 @@ public abstract class ChestSortButtonMixin {
                 }
             }
             if (smallest != i) {
-                client.gameMode.handleContainerInput(syncId, i, 0, ClickType.PICKUP, player);
-                client.gameMode.handleContainerInput(syncId, smallest, 0, ClickType.PICKUP, player);
-                client.gameMode.handleContainerInput(syncId, i, 0, ClickType.PICKUP, player);
+                client.gameMode.handleContainerInput(syncId, i, 0, ContainerInput.PICKUP, player);
+                client.gameMode.handleContainerInput(syncId, smallest, 0, ContainerInput.PICKUP, player);
+                client.gameMode.handleContainerInput(syncId, i, 0, ContainerInput.PICKUP, player);
             }
         }
     }
