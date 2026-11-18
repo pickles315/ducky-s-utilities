@@ -1,6 +1,6 @@
 package dev.ducky.utilities.client.mixin;
 
-import dev.ducky.utilities.OffhandToolHelper;
+import dev.ducky.utilities.client.OffhandToolHelper;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.world.InteractionHand;
@@ -43,14 +43,11 @@ public abstract class MinecraftToolSwingMixin {
             return original;
         }
 
-        // Use the offhand sword for the swing when the attack is being
-        // performed with the offhand sword selected by PlayerAttackMixin.
         if (minecraft.hitResult.getType() == HitResult.Type.ENTITY
                 && OffhandToolHelper.shouldUseOffhandForAttack(player)) {
             return InteractionHand.OFF_HAND;
         }
 
-        // For block breaking, animate whichever hand has the better tool.
         if (minecraft.hitResult.getType() == HitResult.Type.BLOCK
                 && minecraft.hitResult instanceof BlockHitResult blockHit
                 && player.level() != null
