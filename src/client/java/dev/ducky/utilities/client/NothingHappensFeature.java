@@ -31,7 +31,7 @@ public final class NothingHappensFeature {
 
             if (ThreadLocalRandom.current().nextLong(ONE_QUINTILLION) == 0L) {
                 SystemToast.add(
-                    client,
+                    client.gui.toastManager(),
                     SystemToast.SystemToastId.PERIODIC_NOTIFICATION,
                     Component.literal("One in a Quintillion"),
                     Component.literal("Very lucky. Nothing happened.")
