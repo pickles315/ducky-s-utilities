@@ -44,6 +44,20 @@ public final class OptimisedConfigScreen {
                                 .controller(o -> DoubleSliderControllerBuilder.create(o).range(16.0, 256.0).step(8.0)
                                         .valueFormatter(v -> Component.literal(Math.round(v) + " blocks"))).build())
                         .build())
+                .category(ConfigCategory.createBuilder()
+                        .name(Component.literal("Dropped Items"))
+                        .option(Option.<Boolean>createBuilder()
+                                .name(Component.literal("Dropped item culling"))
+                                .description(OptionDescription.of(Component.literal("Skip rendering dropped items beyond the selected distance.")))
+                                .binding(true, () -> PerformanceConfig.itemEntityCulling, v -> { PerformanceConfig.itemEntityCulling = v; PerformanceConfig.save(); })
+                                .controller(BooleanControllerBuilder::create).build())
+                        .option(Option.<Double>createBuilder()
+                                .name(Component.literal("Dropped item render distance"))
+                                .description(OptionDescription.of(Component.literal("Maximum dropped-item render distance in blocks.")))
+                                .binding(48.0, () -> PerformanceConfig.maxItemEntityDistance, v -> { PerformanceConfig.maxItemEntityDistance = v; PerformanceConfig.save(); })
+                                .controller(o -> DoubleSliderControllerBuilder.create(o).range(16.0, 256.0).step(8.0)
+                                        .valueFormatter(v -> Component.literal(Math.round(v) + " blocks"))).build())
+                        .build())
                 .build().generateScreen(parent);
     }
 }
