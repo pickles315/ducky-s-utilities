@@ -12,6 +12,8 @@ permissions:
 jobs:
   build:
     runs-on: ubuntu-latest
+    env:
+      MOD_VERSION: 1.0.${{ github.run_number }}
     steps:
       - uses: actions/checkout@v6
       - name: Set up Java 25
@@ -22,24 +24,24 @@ jobs:
       - uses: gradle/actions/setup-gradle@v5
         with:
           gradle-version: 9.8.0
-      - name: Build
-        run: gradle build
+      - name: Build versioned JAR
+        run: gradle -Pmod_version="$MOD_VERSION" build
       - name: Upload JAR
         uses: actions/upload-artifact@v7
         with:
-          name: ducky-s-utilities-fabric-26.2
+          name: ducky-s-utilities-fabric-26.2-${{ env.MOD_VERSION }}
           path: build/libs/*.jar
           if-no-files-found: error
       - name: Publish GitHub prerelease
         if: github.event_name == 'push' && github.ref == 'refs/heads/main'
         uses: softprops/action-gh-release@v2
         with:
-          tag_name: v1.0.0-build.${{ github.run_number }}
-          name: Ducky's MC Utilities v1.0.0 (Build ${{ github.run_number }})
+          tag_name: v${{ env.MOD_VERSION }}
+          name: Ducky's MC Utilities v${{ env.MOD_VERSION }}
           body: |
             Automated Fabric build for Minecraft 26.2.
 
-            Install the JAR in your mods folder alongside Fabric Loader and the required dependencies.
+            Install the versioned JAR in your mods folder alongside Fabric Loader and the required dependencies.
           files: build/libs/*.jar
           prerelease: true
           generate_release_notes: true
