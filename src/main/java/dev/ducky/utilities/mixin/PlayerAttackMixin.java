@@ -10,9 +10,9 @@ import org.spongepowered.asm.mixin.injection.Redirect;
 @Mixin(Player.class)
 public abstract class PlayerAttackMixin {
     @Redirect(method = "attack", at = @At(value = "INVOKE",
-            target = "Lnet/minecraft/world/entity/player/Player;getMainHandItem()Lnet/minecraft/world/item/ItemStack;"))
+            target = "Lnet/minecraft/world/entity/player/Player;getWeaponItem()Lnet/minecraft/world/item/ItemStack;"))
     private ItemStack duckyUtilities$useOffhandSwordForAttack(Player player) {
         return OffhandToolHelper.shouldUseOffhandForAttack(player)
-                ? player.getOffhandItem() : player.getMainHandItem();
+                ? player.getOffhandItem() : player.getWeaponItem();
     }
 }
