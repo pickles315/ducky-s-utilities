@@ -1,0 +1,12 @@
+{
+  "required": true,
+  "package": "dev.ducky.utilities.client.mixin",
+  "compatibilityLevel": "JAVA_25",
+  "client": [
+    "EntityRenderDispatcherMixin",
+    "BlockEntityRenderDispatcherMixin"
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  }
+}
