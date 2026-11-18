@@ -18,6 +18,7 @@ public final class AdaptiveOffhand {
     private static boolean swapActive;
     private static int swappedInventorySlot = -1;
     private static boolean swappedWithOffhand;
+    private static int swappedHotbarSlot = -1;
     private static int targetEntityId = -1;
     private static net.minecraft.core.BlockPos targetBlock;
 
@@ -53,10 +54,12 @@ public final class AdaptiveOffhand {
             if (isSword(player.getMainHandItem())) return;
 
             if (isSword(offhand)) {
-                swapMainHandWithOffhand(client, player);
+                swappedHotbarSlot = player.getInventory().getSelectedSlot();
+                swapMainHandWithOffhand(client, player, swappedHotbarSlot);
                 swappedWithOffhand = true;
             } else if (swordSlot >= 0) {
-                swapInventorySlotIntoMainHand(client, player, swordSlot);
+                swappedHotbarSlot = player.getInventory().getSelectedSlot();
+                swapInventorySlotIntoMainHand(client, player, swordSlot, swappedHotbarSlot);
                 swappedInventorySlot = swordSlot;
             } else {
                 return;
@@ -75,7 +78,8 @@ public final class AdaptiveOffhand {
                 swapMainHandWithOffhand(client, player);
                 swappedWithOffhand = true;
             } else {
-                swapInventorySlotIntoMainHand(client, player, choice.slot());
+                swappedHotbarSlot = player.getInventory().getSelectedSlot();
+                swapInventorySlotIntoMainHand(client, player, choice.slot(), swappedHotbarSlot);
                 swappedInventorySlot = choice.slot();
             }
             targetBlock = blockHit.getBlockPos();
@@ -92,16 +96,17 @@ public final class AdaptiveOffhand {
     }
 
     private static void restoreIfNeeded(Minecraft client, LocalPlayer player) {
-        if (!swapActive || player == null || client.gameMode == null
-                || player.containerMenu != player.inventoryMenu) {
-            clearState();
+        if (!swapActive || player == null || client.gameMode == null) {
+            return;
+        }
+        if (player.containerMenu != player.inventoryMenu) {
             return;
         }
 
         if (swappedWithOffhand) {
-            swapMainHandWithOffhand(client, player);
+            swapMainHandWithOffhand(client, player, swappedHotbarSlot);
         } else if (swappedInventorySlot >= 0) {
-            swapInventorySlotIntoMainHand(client, player, swappedInventorySlot);
+            swapInventorySlotIntoMainHand(client, player, swappedInventorySlot, swappedHotbarSlot);
         }
         clearState();
     }
@@ -110,21 +115,23 @@ public final class AdaptiveOffhand {
         swapActive = false;
         swappedInventorySlot = -1;
         swappedWithOffhand = false;
+        swappedHotbarSlot = -1;
         targetEntityId = -1;
         targetBlock = null;
     }
 
-    private static void swapMainHandWithOffhand(Minecraft client, LocalPlayer player) {
-        int selectedMenuSlot = player.getInventory().getSelectedSlot() + 36;
+    private static void swapMainHandWithOffhand(
+            Minecraft client, LocalPlayer player, int hotbarSlot) {
+        int selectedMenuSlot = hotbarSlot + 36;
         client.gameMode.handleContainerInput(
                 player.inventoryMenu.containerId, selectedMenuSlot, OFFHAND_BUTTON,
                 ContainerInput.SWAP, player);
     }
 
     private static void swapInventorySlotIntoMainHand(
-            Minecraft client, LocalPlayer player, int inventorySlot) {
+            Minecraft client, LocalPlayer player, int inventorySlot, int hotbarSlot) {
         int menuSlot = inventorySlot < 9 ? inventorySlot + 36 : inventorySlot;
-        int selectedHotbarButton = player.getInventory().getSelectedSlot();
+        int selectedHotbarButton = hotbarSlot;
         client.gameMode.handleContainerInput(
                 player.inventoryMenu.containerId, menuSlot, selectedHotbarButton,
                 ContainerInput.SWAP, player);
