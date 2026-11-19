@@ -27,7 +27,7 @@ public abstract class PauseScreenMixin {
                 button.setPosition(x, originalY - buttonHeight - 4);
                 ((ScreenAccessor) (Object) screen).duckyUtilities$addRenderableWidget(
                         Button.builder(Component.literal("Ducky's Utilities"),
-                                press -> net.minecraft.client.Minecraft.getInstance().setScreen(
+                                press -> net.minecraft.client.Minecraft.getInstance().gui.setScreen(
                                         new DuckyUtilitiesScreen(screen)))
                                 .bounds(x, originalY, buttonWidth, buttonHeight).build());
                 return;
