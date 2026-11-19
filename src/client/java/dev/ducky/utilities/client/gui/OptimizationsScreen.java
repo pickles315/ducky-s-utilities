@@ -46,7 +46,6 @@ public final class OptimizationsScreen extends Screen {
         clearWidgets();
         int rowHeight = 32;
         int top = 62;
-        int labelX = Math.max(12, width / 2 - 300);
         int buttonX = Math.min(width - 92, width / 2 + 220);
         for (int i = 0; i < entries.size(); i++) {
             Entry entry = entries.get(i);
@@ -61,9 +60,8 @@ public final class OptimizationsScreen extends Screen {
                     .build();
             addRenderableWidget(toggle);
         }
-        int doneWidth = 100;
         addRenderableWidget(Button.builder(Component.literal("Done"), button -> minecraft.gui.setScreen(parent))
-                .bounds(width - doneWidth - 14, height - 32, doneWidth, 20).build());
+                .bounds(width - 114, height - 32, 100, 20).build());
     }
 
     private static Component toggleText(Entry entry) {
@@ -80,29 +78,29 @@ public final class OptimizationsScreen extends Screen {
         graphics.fill(left, top, right, bottom, 0xE90B0B0B);
         graphics.fill(left, top, right, top + 3, 0xFFFFD52A);
         graphics.text(font, Component.literal("DUCKY'S OPTIMIZATIONS"), left + 14, 18, 0xFFFFD52A);
-        graphics.drawString(font, Component.literal("Performance controls"), left + 14, 38, 0xFFAAAAAA);
+        graphics.text(font, Component.literal("Performance controls"), left + 14, 38, 0xFFAAAAAA);
 
         int labelX = left + 14;
         int rowY = 62;
         for (Entry entry : entries) {
-            graphics.drawString(font, Component.literal(entry.name()), labelX, rowY + 2, 0xFFFFFFFF);
+            graphics.text(font, Component.literal(entry.name()), labelX, rowY + 2, 0xFFFFFFFF);
             int impactColor = switch (entry.impact()) {
                 case "HIGH" -> 0xFFFF6B45;
                 case "MEDIUM" -> 0xFFFFD52A;
                 default -> 0xFFB8B8B8;
             };
-            graphics.drawString(font, Component.literal("Performance impact: " + entry.impact()),
+            graphics.text(font, Component.literal("Performance impact: " + entry.impact()),
                     labelX, rowY + 14, impactColor);
             rowY += 32;
         }
-        graphics.drawString(font, Component.literal("Hover over an option for its description."),
-                left + 14, bottom - 18, 0xFFAAAAAA, false);
-        
+        graphics.text(font, Component.literal("Hover over an option for its description."),
+                left + 14, bottom - 18, 0xFFAAAAAA);
+        super.extractRenderState(graphics, mouseX, mouseY, partialTick);
     }
 
     @Override
     public void onClose() {
         PerformanceConfig.save();
-        minecraft.setScreen(parent);
+        minecraft.gui.setScreen(parent);
     }
 }
