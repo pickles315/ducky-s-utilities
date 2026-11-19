@@ -5,6 +5,9 @@ import net.minecraft.client.renderer.culling.Frustum;
 import net.minecraft.client.renderer.entity.EntityRenderDispatcher;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.item.ItemEntity;
+import net.minecraft.world.entity.ExperienceOrb;
+import net.minecraft.world.entity.projectile.Projectile;
+import net.minecraft.world.entity.LivingEntity;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
@@ -22,6 +25,21 @@ public abstract class EntityRenderDispatcherMixin {
                 cir.setReturnValue(false);
                 return;
             }
+        }
+        if (entity instanceof ExperienceOrb && PerformanceConfig.experienceOrbCulling
+                && beyond(entity, cameraX, cameraY, cameraZ, PerformanceConfig.maxExperienceOrbDistance)) {
+            cir.setReturnValue(false);
+            return;
+        }
+        if (entity instanceof Projectile && PerformanceConfig.projectileCulling
+                && beyond(entity, cameraX, cameraY, cameraZ, PerformanceConfig.maxProjectileDistance)) {
+            cir.setReturnValue(false);
+            return;
+        }
+        if (entity instanceof LivingEntity && PerformanceConfig.livingEntityCulling
+                && beyond(entity, cameraX, cameraY, cameraZ, PerformanceConfig.maxLivingEntityDistance)) {
+            cir.setReturnValue(false);
+            return;
         }
         if (!PerformanceConfig.entityCulling) return;
         double limit = PerformanceConfig.maxEntityDistance;
