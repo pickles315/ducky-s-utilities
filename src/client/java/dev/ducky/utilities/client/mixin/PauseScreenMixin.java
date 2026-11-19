@@ -15,22 +15,35 @@ public abstract class PauseScreenMixin {
     @Inject(method = "init", at = @At("TAIL"))
     private void duckyUtilities$addUtilitiesButton(CallbackInfo ci) {
         PauseScreen screen = (PauseScreen) (Object) this;
-        for (var child : screen.children()) {
-            if (child instanceof Button button
-                    && (button.getMessage().getString().equals("Back to Game")
-                    || button.getMessage().getString().equals("Return to Game"))) {
-                int x = button.getX();
-                int y = button.getY();
-                int buttonWidth = button.getWidth();
-                int buttonHeight = button.getHeight();
+        int buttonWidth = 200;
+        int buttonHeight = 20;
+        int x = (screen.width - buttonWidth) / 2;
+        int y = 40;
 
-                ((ScreenAccessor) (Object) screen).duckyUtilities$addRenderableWidget(
-                        Button.builder(Component.literal("Ducky's Utilities"),
-                                press -> net.minecraft.client.Minecraft.getInstance().gui.setScreen(
-                                        new DuckyUtilitiesScreen(screen)))
-                                .bounds(x, y + buttonHeight + 4, buttonWidth, buttonHeight).build());
-                return;
+        // Find the first centered row that does not overlap an existing pause-menu button.
+        while (y + buttonHeight < screen.height - 8) {
+            boolean occupied = false;
+            for (var child : screen.children()) {
+                if (child instanceof Button button
+                        && x < button.getX() + button.getWidth()
+                        && x + buttonWidth > button.getX()
+                        && y < button.getY() + button.getHeight()
+                        && y + buttonHeight > button.getY()) {
+                    occupied = true;
+                    break;
+                }
             }
+            if (!occupied) {
+                break;
+            }
+            y += buttonHeight + 4;
         }
+
+        ((ScreenAccessor) (Object) screen).duckyUtilities$addRenderableWidget(
+                Button.builder(Component.literal("Ducky's Utilities"),
+                        press -> net.minecraft.client.Minecraft.getInstance().setScreen(
+                                new DuckyUtilitiesScreen(screen)))
+                        .bounds(x, y, buttonWidth, buttonHeight)
+                        .build());
     }
 }
