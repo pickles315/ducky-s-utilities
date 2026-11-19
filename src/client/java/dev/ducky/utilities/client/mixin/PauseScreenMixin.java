@@ -1,7 +1,6 @@
 package dev.ducky.utilities.client.mixin;
 
 import dev.ducky.utilities.client.gui.DuckyUtilitiesScreen;
-import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.PauseScreen;
@@ -21,15 +20,15 @@ public abstract class PauseScreenMixin {
                     && (button.getMessage().getString().equals("Back to Game")
                     || button.getMessage().getString().equals("Return to Game"))) {
                 int x = button.getX();
-                int originalY = button.getY();
+                int y = button.getY();
                 int buttonWidth = button.getWidth();
                 int buttonHeight = button.getHeight();
-                button.setPosition(x, originalY - buttonHeight - 4);
+
                 ((ScreenAccessor) (Object) screen).duckyUtilities$addRenderableWidget(
                         Button.builder(Component.literal("Ducky's Utilities"),
                                 press -> net.minecraft.client.Minecraft.getInstance().gui.setScreen(
                                         new DuckyUtilitiesScreen(screen)))
-                                .bounds(x, originalY, buttonWidth, buttonHeight).build());
+                                .bounds(x, y + buttonHeight + 4, buttonWidth, buttonHeight).build());
                 return;
             }
         }
