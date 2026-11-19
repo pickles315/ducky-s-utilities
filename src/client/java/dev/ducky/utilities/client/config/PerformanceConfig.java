@@ -13,6 +13,8 @@ import java.util.Properties;
 public final class PerformanceConfig {
     private static final Path CONFIG_PATH = FabricLoader.getInstance().getConfigDir().resolve("ducky-utilities.properties");
 
+    public static volatile boolean sortingEnabled = true;
+    public static volatile boolean adaptiveToolSwitching = true;
     public static volatile boolean entityCulling = true;
     public static volatile double maxEntityDistance = 96.0;
     public static volatile boolean blockEntityCulling = true;
@@ -22,7 +24,7 @@ public final class PerformanceConfig {
     public static volatile boolean chunkUpdateOptimization = true;
     public static volatile boolean chunkLoadingOptimization = true;
     public static volatile boolean blockUpdateOptimization = true;
-    public static volatile boolean lightingOptimization = true;
+    public static volatile boolean lightingOptimization = false;
 
     private PerformanceConfig() {}
 
@@ -32,6 +34,8 @@ public final class PerformanceConfig {
             try (Reader reader = Files.newBufferedReader(CONFIG_PATH)) { p.load(reader); }
             catch (IOException e) { DuckyUtilitiesClient.LOGGER.warn("Could not read Ducky Utilities config.", e); }
         }
+        sortingEnabled = Boolean.parseBoolean(p.getProperty("sortingEnabled", "true"));
+        adaptiveToolSwitching = Boolean.parseBoolean(p.getProperty("adaptiveToolSwitching", "true"));
         entityCulling = Boolean.parseBoolean(p.getProperty("entityCulling", "true"));
         maxEntityDistance = readDistance(p, "maxEntityDistance", 96.0, 512.0);
         blockEntityCulling = Boolean.parseBoolean(p.getProperty("blockEntityCulling", "true"));
@@ -41,7 +45,7 @@ public final class PerformanceConfig {
         chunkUpdateOptimization = Boolean.parseBoolean(p.getProperty("chunkUpdateOptimization", "true"));
         chunkLoadingOptimization = Boolean.parseBoolean(p.getProperty("chunkLoadingOptimization", "true"));
         blockUpdateOptimization = Boolean.parseBoolean(p.getProperty("blockUpdateOptimization", "true"));
-        lightingOptimization = Boolean.parseBoolean(p.getProperty("lightingOptimization", "true"));
+        lightingOptimization = Boolean.parseBoolean(p.getProperty("lightingOptimization", "false"));
         save();
     }
 
@@ -52,6 +56,8 @@ public final class PerformanceConfig {
 
     public static synchronized void save() {
         Properties p = new Properties();
+        p.setProperty("sortingEnabled", Boolean.toString(sortingEnabled));
+        p.setProperty("adaptiveToolSwitching", Boolean.toString(adaptiveToolSwitching));
         p.setProperty("entityCulling", Boolean.toString(entityCulling));
         p.setProperty("maxEntityDistance", Double.toString(maxEntityDistance));
         p.setProperty("blockEntityCulling", Boolean.toString(blockEntityCulling));
