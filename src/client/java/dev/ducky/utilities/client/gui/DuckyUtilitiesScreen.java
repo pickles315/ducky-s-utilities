@@ -56,7 +56,6 @@ public final class DuckyUtilitiesScreen extends Screen {
 
     @Override
     public void extractRenderState(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float partialTick) {
-        super.extractRenderState(graphics, mouseX, mouseY, partialTick);
         int panelWidth = Math.min(440, width - 24);
         int left = (width - panelWidth) / 2;
         int top = height / 2 - 104;
@@ -65,5 +64,6 @@ public final class DuckyUtilitiesScreen extends Screen {
         graphics.centeredText(font, title, width / 2, top + 18, 0xFFFFD52A);
         graphics.centeredText(font, Component.literal("Client-side gameplay and performance controls"),
                 width / 2, top + 38, 0xFFCCCCCC);
+        super.extractRenderState(graphics, mouseX, mouseY, partialTick);
     }
 }
