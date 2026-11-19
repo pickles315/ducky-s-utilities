@@ -1,7 +1,7 @@
 package dev.ducky.utilities.client.gui;
 
 import dev.ducky.utilities.client.config.PerformanceConfig;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
@@ -62,7 +62,7 @@ public final class OptimizationsScreen extends Screen {
             addRenderableWidget(toggle);
         }
         int doneWidth = 100;
-        addRenderableWidget(Button.builder(Component.literal("Done"), button -> minecraft.setScreen(parent))
+        addRenderableWidget(Button.builder(Component.literal("Done"), button -> minecraft.gui.setScreen(parent))
                 .bounds(width - doneWidth - 14, height - 32, doneWidth, 20).build());
     }
 
@@ -71,8 +71,8 @@ public final class OptimizationsScreen extends Screen {
     }
 
     @Override
-    public void render(GuiGraphics graphics, int mouseX, int mouseY, float partialTick) {
-        renderBackground(graphics, mouseX, mouseY, partialTick);
+    public void extractRenderState(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float partialTick) {
+        super.extractRenderState(graphics, mouseX, mouseY, partialTick);
         int panelWidth = Math.min(660, width - 20);
         int left = (width - panelWidth) / 2;
         int right = left + panelWidth;
@@ -80,25 +80,25 @@ public final class OptimizationsScreen extends Screen {
         int bottom = height - 40;
         graphics.fill(left, top, right, bottom, 0xE90B0B0B);
         graphics.fill(left, top, right, top + 3, 0xFFFFD52A);
-        graphics.drawString(font, Component.literal("DUCKY'S OPTIMIZATIONS"), left + 14, 18, 0xFFFFD52A, false);
-        graphics.drawString(font, Component.literal("Performance controls"), left + 14, 38, 0xFFAAAAAA, false);
+        graphics.text(font, Component.literal("DUCKY'S OPTIMIZATIONS"), left + 14, 18, 0xFFFFD52A);
+        graphics.drawString(font, Component.literal("Performance controls"), left + 14, 38, 0xFFAAAAAA);
 
         int labelX = left + 14;
         int rowY = 66;
         for (Entry entry : entries) {
-            graphics.drawString(font, Component.literal(entry.name()), labelX, rowY + 2, 0xFFFFFFFF, false);
+            graphics.drawString(font, Component.literal(entry.name()), labelX, rowY + 2, 0xFFFFFFFF);
             int impactColor = switch (entry.impact()) {
                 case "HIGH" -> 0xFFFF6B45;
                 case "MEDIUM" -> 0xFFFFD52A;
                 default -> 0xFFB8B8B8;
             };
             graphics.drawString(font, Component.literal("Performance impact: " + entry.impact()),
-                    labelX, rowY + 15, impactColor, false);
+                    labelX, rowY + 15, impactColor);
             rowY += 38;
         }
         graphics.drawString(font, Component.literal("Hover over an option for its description."),
                 left + 14, bottom - 18, 0xFFAAAAAA, false);
-        super.render(graphics, mouseX, mouseY, partialTick);
+        
     }
 
     @Override
