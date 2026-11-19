@@ -1,6 +1,7 @@
 package dev.ducky.utilities.client;
 
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
+import dev.ducky.utilities.client.config.PerformanceConfig;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.core.registries.BuiltInRegistries;
@@ -27,6 +28,10 @@ public final class AdaptiveOffhand {
 
     private static void onClientTick(Minecraft client) {
         LocalPlayer player = client.player;
+        if (!PerformanceConfig.adaptiveToolSwitching) {
+            restoreIfNeeded(client, player);
+            return;
+        }
         if (player == null || client.level == null || client.gameMode == null
                 || client.gui.screen() != null || player.containerMenu != player.inventoryMenu) {
             restoreIfNeeded(client, player);
