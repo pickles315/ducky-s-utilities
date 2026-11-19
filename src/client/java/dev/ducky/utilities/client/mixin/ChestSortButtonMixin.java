@@ -1,5 +1,6 @@
 package dev.ducky.utilities.client.mixin;
 
+import dev.ducky.utilities.client.config.PerformanceConfig;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
@@ -26,7 +27,7 @@ public abstract class ChestSortButtonMixin {
 
     @Inject(method = "init", at = @At("TAIL"))
     private void duckyUtilities$addSortButton(CallbackInfo ci) {
-        if (duckyUtilities$containerSlotCount() <= 0) return;
+        if (!PerformanceConfig.sortingEnabled || duckyUtilities$containerSlotCount() <= 0) return;
 
         AbstractContainerScreen<?> screen = (AbstractContainerScreen<?>) (Object) this;
         // Keep the button above the container instead of beside it, where
