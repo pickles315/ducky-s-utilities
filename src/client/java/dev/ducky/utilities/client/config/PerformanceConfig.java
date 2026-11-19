@@ -20,6 +20,12 @@ public final class PerformanceConfig {
     public static volatile boolean blockEntityCulling = true;
     public static volatile double maxBlockEntityDistance = 64.0;
     public static volatile boolean itemEntityCulling = true;
+    public static volatile boolean livingEntityCulling = false;
+    public static volatile double maxLivingEntityDistance = 64.0;
+    public static volatile boolean projectileCulling = false;
+    public static volatile double maxProjectileDistance = 48.0;
+    public static volatile boolean experienceOrbCulling = false;
+    public static volatile double maxExperienceOrbDistance = 32.0;
     public static volatile double maxItemEntityDistance = 48.0;
     public static volatile boolean chunkUpdateOptimization = true;
     public static volatile boolean chunkLoadingOptimization = true;
@@ -41,6 +47,12 @@ public final class PerformanceConfig {
         blockEntityCulling = Boolean.parseBoolean(p.getProperty("blockEntityCulling", "true"));
         maxBlockEntityDistance = readDistance(p, "maxBlockEntityDistance", 64.0, 256.0);
         itemEntityCulling = Boolean.parseBoolean(p.getProperty("itemEntityCulling", "true"));
+        livingEntityCulling = Boolean.parseBoolean(p.getProperty("livingEntityCulling", "false"));
+        maxLivingEntityDistance = readDistance(p, "maxLivingEntityDistance", 64.0, 512.0);
+        projectileCulling = Boolean.parseBoolean(p.getProperty("projectileCulling", "false"));
+        maxProjectileDistance = readDistance(p, "maxProjectileDistance", 48.0, 256.0);
+        experienceOrbCulling = Boolean.parseBoolean(p.getProperty("experienceOrbCulling", "false"));
+        maxExperienceOrbDistance = readDistance(p, "maxExperienceOrbDistance", 32.0, 256.0);
         maxItemEntityDistance = readDistance(p, "maxItemEntityDistance", 48.0, 256.0);
         chunkUpdateOptimization = Boolean.parseBoolean(p.getProperty("chunkUpdateOptimization", "true"));
         chunkLoadingOptimization = Boolean.parseBoolean(p.getProperty("chunkLoadingOptimization", "true"));
@@ -63,6 +75,12 @@ public final class PerformanceConfig {
         p.setProperty("blockEntityCulling", Boolean.toString(blockEntityCulling));
         p.setProperty("maxBlockEntityDistance", Double.toString(maxBlockEntityDistance));
         p.setProperty("itemEntityCulling", Boolean.toString(itemEntityCulling));
+        p.setProperty("livingEntityCulling", Boolean.toString(livingEntityCulling));
+        p.setProperty("maxLivingEntityDistance", Double.toString(maxLivingEntityDistance));
+        p.setProperty("projectileCulling", Boolean.toString(projectileCulling));
+        p.setProperty("maxProjectileDistance", Double.toString(maxProjectileDistance));
+        p.setProperty("experienceOrbCulling", Boolean.toString(experienceOrbCulling));
+        p.setProperty("maxExperienceOrbDistance", Double.toString(maxExperienceOrbDistance));
         p.setProperty("maxItemEntityDistance", Double.toString(maxItemEntityDistance));
         p.setProperty("chunkUpdateOptimization", Boolean.toString(chunkUpdateOptimization));
         p.setProperty("chunkLoadingOptimization", Boolean.toString(chunkLoadingOptimization));
