@@ -27,6 +27,12 @@ public final class OptimizationsScreen extends Screen {
                 () -> PerformanceConfig.blockEntityCulling, v -> PerformanceConfig.blockEntityCulling = v));
         entries.add(new Entry("Dropped item culling", "LOW", "Stops rendering dropped item entities beyond the configured item distance.",
                 () -> PerformanceConfig.itemEntityCulling, v -> PerformanceConfig.itemEntityCulling = v));
+        entries.add(new Entry("Living entity culling", "MEDIUM", "Stops rendering living entities beyond a shorter distance. Distant mobs and players may disappear sooner.",
+                () -> PerformanceConfig.livingEntityCulling, v -> PerformanceConfig.livingEntityCulling = v));
+        entries.add(new Entry("Projectile culling", "LOW", "Stops rendering distant projectiles such as arrows. Projectiles may disappear before they reach the edge of your view.",
+                () -> PerformanceConfig.projectileCulling, v -> PerformanceConfig.projectileCulling = v));
+        entries.add(new Entry("Experience orb culling", "LOW", "Stops rendering distant experience orbs. This only changes client rendering.",
+                () -> PerformanceConfig.experienceOrbCulling, v -> PerformanceConfig.experienceOrbCulling = v));
         entries.add(new Entry("Chunk update optimization", "MEDIUM", "Uses the non-prioritized chunk rebuild mode. Chunk updates may feel less immediate in some situations.",
                 () -> PerformanceConfig.chunkUpdateOptimization, v -> PerformanceConfig.chunkUpdateOptimization = v));
         entries.add(new Entry("Chunk fade removal", "LOW", "Removes the fade-in animation when chunk sections appear. Chunks pop in instead of fading.",
