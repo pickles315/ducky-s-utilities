@@ -1,7 +1,6 @@
 package dev.ducky.utilities.client;
 
 import dev.ducky.utilities.client.config.PerformanceConfig;
-import dev.ducky.utilities.client.gui.VideoSettingsButton;
 import net.fabricmc.api.ClientModInitializer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -12,7 +11,6 @@ public final class DuckyUtilitiesClient implements ClientModInitializer {
     @Override
     public void onInitializeClient() {
         PerformanceConfig.load();
-        VideoSettingsButton.register();
         AdaptiveOffhand.register();
         net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents.END_CLIENT_TICK.register(WorldPerformanceOptimizations::apply);
         LOGGER.info("Ducky's MC Utilities client features loaded.");
