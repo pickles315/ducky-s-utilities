@@ -14,6 +14,8 @@ import java.util.function.Supplier;
 public final class OptimizationsScreen extends Screen {
     private final Screen parent;
     private final List<Entry> entries = new ArrayList<>();
+    private int page = 0;
+    private static final int ENTRIES_PER_PAGE = 4;
 
     private record Entry(String name, String impact, String description,
                          Supplier<Boolean> get, Consumer<Boolean> set) {}
@@ -44,24 +46,42 @@ public final class OptimizationsScreen extends Screen {
     @Override
     protected void init() {
         clearWidgets();
-        int rowHeight = 32;
-        int top = 62;
-        int buttonX = Math.min(width - 92, width / 2 + 220);
-        for (int i = 0; i < entries.size(); i++) {
+        int panelWidth = Math.max(1, Math.min(660, width - 16));
+        int left = (width - panelWidth) / 2;
+        int toggleWidth = Math.min(72, Math.max(54, panelWidth / 4));
+        int toggleX = left + panelWidth - toggleWidth - 12;
+        int labelWidth = Math.max(40, toggleX - (left + 14) - 12);
+        int availableHeight = Math.max(100, height - 100);
+        int rowHeight = Math.max(30, Math.min(42, availableHeight / ENTRIES_PER_PAGE));
+        int top = 66;
+        int first = page * ENTRIES_PER_PAGE;
+        int last = Math.min(entries.size(), first + ENTRIES_PER_PAGE);
+
+        for (int i = first; i < last; i++) {
             Entry entry = entries.get(i);
-            int y = top + i * rowHeight;
+            int y = top + (i - first) * rowHeight;
             Button toggle = Button.builder(toggleText(entry), button -> {
                 entry.set().accept(!entry.get().get());
                 PerformanceConfig.save();
                 button.setMessage(toggleText(entry));
-            }).bounds(buttonX, y, 78, 22)
+            }).bounds(toggleX, y, toggleWidth, 22)
                     .tooltip(net.minecraft.client.gui.components.Tooltip.create(Component.literal(
                             entry.description() + "  Performance impact: " + entry.impact())))
                     .build();
             addRenderableWidget(toggle);
         }
+
+        int navY = height - 34;
+        addRenderableWidget(Button.builder(Component.literal("Previous"), button -> {
+            page = Math.max(0, page - 1);
+            rebuildWidgets();
+        }).bounds(left + 12, navY, 82, 20).build());
+        addRenderableWidget(Button.builder(Component.literal("Next"), button -> {
+            page = Math.min((entries.size() - 1) / ENTRIES_PER_PAGE, page + 1);
+            rebuildWidgets();
+        }).bounds(left + 102, navY, 82, 20).build());
         addRenderableWidget(Button.builder(Component.literal("Done"), button -> minecraft.gui.setScreen(parent))
-                .bounds(width - 114, height - 32, 100, 20).build());
+                .bounds(width - Math.min(112, panelWidth / 3) - 12, navY, Math.min(112, panelWidth / 3), 20).build());
     }
 
     private static Component toggleText(Entry entry) {
@@ -70,31 +90,35 @@ public final class OptimizationsScreen extends Screen {
 
     @Override
     public void extractRenderState(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float partialTick) {
-        int panelWidth = Math.min(660, width - 20);
+        int panelWidth = Math.max(1, Math.min(660, width - 16));
         int left = (width - panelWidth) / 2;
         int right = left + panelWidth;
         int top = 8;
-        int bottom = height - 40;
+        int bottom = height - 8;
         graphics.fill(left, top, right, bottom, 0xE90B0B0B);
         graphics.fill(left, top, right, top + 3, 0xFFFFD52A);
         graphics.text(font, Component.literal("DUCKY'S OPTIMIZATIONS"), left + 14, 18, 0xFFFFD52A);
         graphics.text(font, Component.literal("Performance controls"), left + 14, 38, 0xFFAAAAAA);
 
-        int labelX = left + 14;
-        int rowY = 62;
-        for (Entry entry : entries) {
-            graphics.text(font, Component.literal(entry.name()), labelX, rowY + 2, 0xFFFFFFFF);
+        int rowHeight = Math.max(30, Math.min(42, Math.max(100, height - 100) / ENTRIES_PER_PAGE));
+        int rowY = 66;
+        int first = page * ENTRIES_PER_PAGE;
+        int last = Math.min(entries.size(), first + ENTRIES_PER_PAGE);
+        for (int i = first; i < last; i++) {
+            Entry entry = entries.get(i);
+            graphics.text(font, Component.literal(entry.name()), left + 14, rowY + 2, 0xFFFFFFFF);
             int impactColor = switch (entry.impact()) {
                 case "HIGH" -> 0xFFFF6B45;
                 case "MEDIUM" -> 0xFFFFD52A;
                 default -> 0xFFB8B8B8;
             };
-            graphics.text(font, Component.literal("Performance impact: " + entry.impact()),
-                    labelX, rowY + 14, impactColor);
-            rowY += 32;
+            graphics.text(font, Component.literal("Impact: " + entry.impact()),
+                    left + 14, rowY + 14, impactColor);
+            rowY += rowHeight;
         }
-        graphics.text(font, Component.literal("Hover over an option for its description."),
-                left + 14, bottom - 18, 0xFFAAAAAA);
+        graphics.centeredText(font,
+                Component.literal("Page " + (page + 1) + " / " + ((entries.size() + ENTRIES_PER_PAGE - 1) / ENTRIES_PER_PAGE)),
+                width / 2, height - 58, 0xFFAAAAAA);
         super.extractRenderState(graphics, mouseX, mouseY, partialTick);
     }
 
