@@ -44,8 +44,8 @@ public final class OptimizationsScreen extends Screen {
     @Override
     protected void init() {
         clearWidgets();
-        int rowHeight = 38;
-        int top = 66;
+        int rowHeight = 32;
+        int top = 62;
         int labelX = Math.max(12, width / 2 - 300);
         int buttonX = Math.min(width - 92, width / 2 + 220);
         for (int i = 0; i < entries.size(); i++) {
@@ -72,7 +72,6 @@ public final class OptimizationsScreen extends Screen {
 
     @Override
     public void extractRenderState(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float partialTick) {
-        super.extractRenderState(graphics, mouseX, mouseY, partialTick);
         int panelWidth = Math.min(660, width - 20);
         int left = (width - panelWidth) / 2;
         int right = left + panelWidth;
@@ -84,7 +83,7 @@ public final class OptimizationsScreen extends Screen {
         graphics.drawString(font, Component.literal("Performance controls"), left + 14, 38, 0xFFAAAAAA);
 
         int labelX = left + 14;
-        int rowY = 66;
+        int rowY = 62;
         for (Entry entry : entries) {
             graphics.drawString(font, Component.literal(entry.name()), labelX, rowY + 2, 0xFFFFFFFF);
             int impactColor = switch (entry.impact()) {
@@ -93,8 +92,8 @@ public final class OptimizationsScreen extends Screen {
                 default -> 0xFFB8B8B8;
             };
             graphics.drawString(font, Component.literal("Performance impact: " + entry.impact()),
-                    labelX, rowY + 15, impactColor);
-            rowY += 38;
+                    labelX, rowY + 14, impactColor);
+            rowY += 32;
         }
         graphics.drawString(font, Component.literal("Hover over an option for its description."),
                 left + 14, bottom - 18, 0xFFAAAAAA, false);
