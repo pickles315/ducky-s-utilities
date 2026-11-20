@@ -87,7 +87,7 @@ public final class DuckyUtilitiesScreen extends Screen {
             entrypoint.getMethod("openScreen", Screen.class).invoke(null, this);
         } catch (ReflectiveOperationException exception) {
             if (minecraft.player != null) {
-                minecraft.player.displayClientMessage(Component.literal("Ducky's Visuals could not be opened. Check that the add-on is installed correctly."), false);
+                System.err.println("[Ducky's Utilities] Ducky's Visuals could not be opened. Check that the add-on is installed correctly.");
             }
         }
     }
