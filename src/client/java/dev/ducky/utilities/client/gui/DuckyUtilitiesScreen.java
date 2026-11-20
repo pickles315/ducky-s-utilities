@@ -25,10 +25,10 @@ public final class DuckyUtilitiesScreen extends Screen {
         int buttonX = (width - buttonWidth) / 2;
 
         int footerY = height - 34;
-        int contentTop = 72;
-        int available = Math.max(66, footerY - contentTop - 12);
-        int gap = Math.min(10, Math.max(4, available / 12));
-        int buttonHeight = Math.max(20, Math.min(26, (available - gap * 2) / 3));
+        int contentTop = 66;
+        int available = Math.max(80, footerY - contentTop - 12);
+        int gap = Math.min(8, Math.max(4, available / 16));
+        int buttonHeight = Math.max(20, Math.min(26, (available - gap * 3) / 4));
 
         addRenderableWidget(Button.builder(toolText(), button -> {
             PerformanceConfig.adaptiveToolSwitching = !PerformanceConfig.adaptiveToolSwitching;
@@ -36,7 +36,7 @@ public final class DuckyUtilitiesScreen extends Screen {
             button.setMessage(toolText());
         }).bounds(buttonX, contentTop, buttonWidth, buttonHeight)
                 .tooltip(Tooltip.create(Component.literal(
-                        "Automatically select a matching tool from your hotbar when looking at a block or living entity. Only activates while holding a supported tool.")))
+                        "Automatically select a matching tool from your hotbar when looking at a block or living entity.")))
                 .build());
 
         int sortY = contentTop + buttonHeight + gap;
@@ -46,10 +46,20 @@ public final class DuckyUtilitiesScreen extends Screen {
             button.setMessage(sortText());
         }).bounds(buttonX, sortY, buttonWidth, buttonHeight)
                 .tooltip(Tooltip.create(Component.literal(
-                        "Show or hide Ducky's Sort button in supported containers.")))
+                        "Show or hide Ducky's existing Sort button in supported chests and containers.")))
                 .build());
 
-        int optimizationsY = sortY + buttonHeight + gap;
+        int inventoryY = sortY + buttonHeight + gap;
+        addRenderableWidget(Button.builder(inventorySortText(), button -> {
+            PerformanceConfig.inventorySortingEnabled = !PerformanceConfig.inventorySortingEnabled;
+            PerformanceConfig.save();
+            button.setMessage(inventorySortText());
+        }).bounds(buttonX, inventoryY, buttonWidth, buttonHeight)
+                .tooltip(Tooltip.create(Component.literal(
+                        "Show a separate Sort button in your own inventory. It sorts the 27 main inventory slots and leaves your hotbar, armor, and offhand untouched.")))
+                .build());
+
+        int optimizationsY = inventoryY + buttonHeight + gap;
         addRenderableWidget(Button.builder(Component.literal("Ducky's Optimizations"),
                 button -> minecraft.gui.setScreen(new OptimizationsScreen(this)))
                 .bounds(buttonX, optimizationsY, buttonWidth, buttonHeight).build());
@@ -66,6 +76,10 @@ public final class DuckyUtilitiesScreen extends Screen {
 
     private static Component sortText() {
         return Component.literal("Container sorting: " + (PerformanceConfig.sortingEnabled ? "ON" : "OFF"));
+    }
+
+    private static Component inventorySortText() {
+        return Component.literal("Inventory sorting: " + (PerformanceConfig.inventorySortingEnabled ? "ON" : "OFF"));
     }
 
     @Override

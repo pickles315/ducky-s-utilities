@@ -14,6 +14,7 @@ public final class PerformanceConfig {
     private static final Path CONFIG_PATH = FabricLoader.getInstance().getConfigDir().resolve("ducky-utilities.properties");
 
     public static volatile boolean sortingEnabled = true;
+    public static volatile boolean inventorySortingEnabled = true;
     public static volatile boolean adaptiveToolSwitching = true;
     public static volatile boolean entityCulling = true;
     public static volatile double maxEntityDistance = 96.0;
@@ -41,6 +42,7 @@ public final class PerformanceConfig {
             catch (IOException e) { DuckyUtilitiesClient.LOGGER.warn("Could not read Ducky Utilities config.", e); }
         }
         sortingEnabled = Boolean.parseBoolean(p.getProperty("sortingEnabled", "true"));
+        inventorySortingEnabled = Boolean.parseBoolean(p.getProperty("inventorySortingEnabled", "true"));
         adaptiveToolSwitching = Boolean.parseBoolean(p.getProperty("adaptiveToolSwitching", "true"));
         entityCulling = Boolean.parseBoolean(p.getProperty("entityCulling", "true"));
         maxEntityDistance = readDistance(p, "maxEntityDistance", 96.0, 512.0);
@@ -69,6 +71,7 @@ public final class PerformanceConfig {
     public static synchronized void save() {
         Properties p = new Properties();
         p.setProperty("sortingEnabled", Boolean.toString(sortingEnabled));
+        p.setProperty("inventorySortingEnabled", Boolean.toString(inventorySortingEnabled));
         p.setProperty("adaptiveToolSwitching", Boolean.toString(adaptiveToolSwitching));
         p.setProperty("entityCulling", Boolean.toString(entityCulling));
         p.setProperty("maxEntityDistance", Double.toString(maxEntityDistance));
