@@ -1,6 +1,7 @@
 package dev.ducky.utilities.client.gui;
 
 import dev.ducky.utilities.client.config.PerformanceConfig;
+import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.Tooltip;
@@ -59,15 +60,36 @@ public final class DuckyUtilitiesScreen extends Screen {
                         "Show a separate Sort button in your own inventory. It sorts the 27 main inventory slots and leaves your hotbar, armor, and offhand untouched.")))
                 .build());
 
-        int optimizationsY = inventoryY + buttonHeight + gap;
-        addRenderableWidget(Button.builder(Component.literal("Ducky's Optimizations"),
-                button -> minecraft.gui.setScreen(new OptimizationsScreen(this)))
-                .bounds(buttonX, optimizationsY, buttonWidth, buttonHeight).build());
+        int toolsY = inventoryY + buttonHeight + gap;
+        if (FabricLoader.getInstance().isModLoaded("ducky_visuals")) {
+            int halfWidth = (buttonWidth - gap) / 2;
+            addRenderableWidget(Button.builder(Component.literal("Ducky's Optimizations"),
+                    button -> minecraft.gui.setScreen(new OptimizationsScreen(this)))
+                    .bounds(buttonX, toolsY, halfWidth, buttonHeight).build());
+            addRenderableWidget(Button.builder(Component.literal("Ducky's Visuals"), button -> openVisuals())
+                    .bounds(buttonX + halfWidth + gap, toolsY, halfWidth, buttonHeight)
+                    .tooltip(Tooltip.create(Component.literal("Open Ducky's Visual settings."))).build());
+        } else {
+            addRenderableWidget(Button.builder(Component.literal("Ducky's Optimizations"),
+                    button -> minecraft.gui.setScreen(new OptimizationsScreen(this)))
+                    .bounds(buttonX, toolsY, buttonWidth, buttonHeight).build());
+        }
 
         int doneWidth = Math.min(112, panelWidth - 24);
         addRenderableWidget(Button.builder(Component.literal("Done"),
                 button -> minecraft.gui.setScreen(parent))
                 .bounds(width - left - doneWidth - 12, footerY, doneWidth, 20).build());
+    }
+
+    private void openVisuals() {
+        try {
+            Class<?> entrypoint = Class.forName("dev.ducky.visuals.client.DuckyVisualsClient");
+            entrypoint.getMethod("openScreen", Screen.class).invoke(null, this);
+        } catch (ReflectiveOperationException exception) {
+            if (minecraft.player != null) {
+                minecraft.player.displayClientMessage(Component.literal("Ducky's Visuals could not be opened. Check that the add-on is installed correctly."), false);
+            }
+        }
     }
 
     private static Component toolText() {
