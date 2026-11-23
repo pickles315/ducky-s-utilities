@@ -1,8 +1,8 @@
 pluginManagement {
     repositories {
-        maven { url = "https://maven.fabricmc.net/" }
         gradlePluginPortal()
-        mavenCentral()
+        maven { url = 'https://maven.minecraftforge.net/' }
+        maven { url = 'https://repo.spongepowered.org/repository/maven-public/' }
     }
 }
-rootProject.name = "ducky-s-utilities"
+rootProject.name = 'ducky-s-utilities-forge-1.20.1'
