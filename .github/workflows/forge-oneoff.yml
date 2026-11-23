@@ -1,7 +1,8 @@
 name: One-off Forge 1.20.1 Build
 
 on:
-  workflow_dispatch:
+  push:
+    branches: [forge-1.20.1-oneoff]
 
 permissions:
   contents: read
