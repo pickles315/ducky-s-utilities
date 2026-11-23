@@ -3,6 +3,9 @@ package dev.ducky.utilities.client.mixin;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.MultiLineEditBox;
+import net.minecraft.client.gui.components.Renderable;
+import net.minecraft.client.gui.components.events.GuiEventListener;
+import net.minecraft.client.gui.narration.NarratableEntry;
 import net.minecraft.client.gui.screens.inventory.BookEditScreen;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -22,18 +25,21 @@ public abstract class BookEditScreenMixin {
     @Shadow private int currentPage;
     @Shadow private MultiLineEditBox page;
 
+    @Shadow
+    protected abstract <T extends GuiEventListener & Renderable & NarratableEntry> T addRenderableWidget(T widget);
+
     @Inject(method = "init", at = @At("TAIL"))
     private void duckyUtilities$addBookClipboardButtons(CallbackInfo ci) {
         BookEditScreen screen = (BookEditScreen) (Object) this;
         int x = screen.width / 2 + 101;
         int y = screen.height / 2 - 24;
 
-        screen.addRenderableWidget(Button.builder(
+        this.addRenderableWidget(Button.builder(
                 net.minecraft.network.chat.Component.literal("Copy"),
                 button -> duckyUtilities$copyBook())
                 .bounds(x, y, 54, 20).build());
 
-        screen.addRenderableWidget(Button.builder(
+        this.addRenderableWidget(Button.builder(
                 net.minecraft.network.chat.Component.literal("Paste"),
                 button -> duckyUtilities$pasteBook())
                 .bounds(x, y + 24, 54, 20).build());
