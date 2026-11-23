@@ -1,56 +1,49 @@
 plugins {
-    id 'net.fabricmc.fabric-loom' version "${loom_version}"
+    id 'net.minecraftforge.gradle' version '[6.0,6.2)'
+    id 'org.spongepowered.mixin' version '0.7-SNAPSHOT'
 }
 
-version = project.mod_version
-group = project.maven_group
-
-base {
-    archivesName = project.archives_base_name
-}
-
-repositories {
-    mavenCentral()
-    maven {
-        name = "Modrinth"
-        url = "https://api.modrinth.com/maven"
-    }
-}
-
-loom {
-    splitEnvironmentSourceSets()
-    mods {
-        "ducky_utilities" {
-            sourceSet sourceSets.main
-            sourceSet sourceSets.client
-        }
-    }
-}
-
-dependencies {
-    minecraft "com.mojang:minecraft:${project.minecraft_version}"
-    implementation "net.fabricmc:fabric-loader:${project.loader_version}"
-    implementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_api_version}"
-    include "net.fabricmc.fabric-api:fabric-api:${project.fabric_api_version}"
-    implementation "maven.modrinth:1eAoo2KR:${project.yacl_version}"
-    include "maven.modrinth:1eAoo2KR:${project.yacl_version}"
-}
-
-processResources {
-    inputs.property "version", project.version
-    filesMatching("fabric.mod.json") {
-        expand "version": project.version
-    }
-}
+group = 'dev.ducky'
+version = '1.0.0'
+base { archivesName = 'ducky-s-utilities-forge-1.20.1' }
 
 java {
-    toolchain {
-        languageVersion = JavaLanguageVersion.of(25)
+    toolchain { languageVersion = JavaLanguageVersion.of(17) }
+}
+
+minecraft {
+    mappings channel: 'official', version: '1.20.1'
+    runs {
+        client { workingDirectory project.file('run'); property 'forge.logging.console.level', 'debug'; mods { ducky_utilities { source sourceSets.main } } }
     }
-    withSourcesJar()
+}
+
+repositories { mavenCentral() }
+
+dependencies {
+    minecraft 'net.minecraftforge:forge:1.20.1-47.2.0'
+    annotationProcessor 'org.spongepowered:mixin:0.8.5:processor'
+}
+
+mixin {
+    add sourceSets.main, 'ducky_utilities.refmap.json'
+    config 'ducky_utilities.mixins.json'
 }
 
 tasks.withType(JavaCompile).configureEach {
-    options.release = 25
-    options.encoding = "UTF-8"
+    options.encoding = 'UTF-8'
+    options.release = 17
+}
+
+jar {
+    manifest {
+        attributes([
+            'Specification-Title': 'ducky_utilities',
+            'Specification-Vendor': 'Ducky',
+            'Specification-Version': '1',
+            'Implementation-Title': project.name,
+            'Implementation-Version': project.version,
+            'MixinConfigs': 'ducky_utilities.mixins.json'
+        ])
+    }
 }
