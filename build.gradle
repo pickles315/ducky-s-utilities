@@ -1,6 +1,5 @@
 plugins {
     id 'net.minecraftforge.gradle' version '[6.0,6.2)'
-    id 'org.spongepowered.mixin' version '0.7-SNAPSHOT'
 }
 
 group = 'dev.ducky'
@@ -14,7 +13,11 @@ java {
 minecraft {
     mappings channel: 'official', version: '1.20.1'
     runs {
-        client { workingDirectory project.file('run'); property 'forge.logging.console.level', 'debug'; mods { ducky_utilities { source sourceSets.main } } }
+        client {
+            workingDirectory project.file('run')
+            property 'forge.logging.console.level', 'info'
+            mods { ducky_utilities { source sourceSets.main } }
+        }
     }
 }
 
@@ -22,12 +25,6 @@ repositories { mavenCentral() }
 
 dependencies {
     minecraft 'net.minecraftforge:forge:1.20.1-47.2.0'
-    annotationProcessor 'org.spongepowered:mixin:0.8.5:processor'
-}
-
-mixin {
-    add sourceSets.main, 'ducky_utilities.refmap.json'
-    config 'ducky_utilities.mixins.json'
 }
 
 tasks.withType(JavaCompile).configureEach {
@@ -42,8 +39,7 @@ jar {
             'Specification-Vendor': 'Ducky',
             'Specification-Version': '1',
             'Implementation-Title': project.name,
-            'Implementation-Version': project.version,
-            'MixinConfigs': 'ducky_utilities.mixins.json'
+            'Implementation-Version': project.version
         ])
     }
 }
