@@ -1,0 +1,11 @@
+{
+  "required": true,
+  "minVersion": "0.8",
+  "package": "dev.ducky.utilities.mixin",
+  "compatibilityLevel": "JAVA_17",
+  "refmap": "ducky_utilities.refmap.json",
+  "client": [
+    "MinecraftToolSwingMixin"
+  ],
+  "injectors": { "defaultRequire": 1 }
+}
