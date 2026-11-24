@@ -9,12 +9,16 @@ import java.util.List;
 import java.util.Set;
 
 public final class SodiumCompatMixinPlugin implements IMixinConfigPlugin {
-    private boolean sodiumPresent;
+    private boolean externalRendererPresent;
 
     @Override
     public void onLoad(String mixinPackage) {
         FabricLoader loader = FabricLoader.getInstance();
-        sodiumPresent = loader.isModLoaded("sodium") || loader.isModLoaded("voxy");
+        // These renderers manage their own visibility/culling paths. Avoid
+        // injecting our vanilla dispatcher hooks into their render pipelines.
+        externalRendererPresent = loader.isModLoaded("sodium")
+                || loader.isModLoaded("voxy")
+                || loader.isModLoaded("mobileglues");
     }
 
     @Override
@@ -24,7 +28,7 @@ public final class SodiumCompatMixinPlugin implements IMixinConfigPlugin {
 
     @Override
     public boolean shouldApplyMixin(String targetClassName, String mixinClassName) {
-        if (!sodiumPresent) return true;
+        if (!externalRendererPresent) return true;
         return !mixinClassName.endsWith(".EntityRenderDispatcherMixin")
                 && !mixinClassName.endsWith(".BlockEntityRenderDispatcherMixin");
     }
